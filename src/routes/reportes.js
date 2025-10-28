@@ -150,24 +150,23 @@ router.post("/enviar", async (req, res) => {
   const pdf = await generarPDF(titulo, lecturas, tipo);
 
   try {
-    /*const transporter = nodemailer.createTransport({
-      service: process.env.EMAIL_SERVICE,
-      auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS,
-      },
-    });*/
+    const base64PDF = pdf.toString("base64");
 
-    await resend.emails.send({
+    const data = await resend.emails.send({
       from: `"Sistema Vinícola" <${process.env.EMAIL_USER}>`,
       to: correo,
       subject: titulo,
       text: "Se adjunta el reporte solicitado.",
       attachments: [
-        { filename: `${titulo}.pdf`, content: pdf },
+        {
+          filename: `${titulo}.pdf`,
+          content: base64PDF,
+          encoding: "base64",
+        },
       ],
     });
-
+    
+    console.log("Correo enviado:", data);
     res.json({ message: "Reporte enviado correctamente" });
   } catch (err) {
     console.error("Error al enviar correo:", err);
